@@ -24,8 +24,21 @@ Contributors:
         }
     </style>
     <template>
-        <nuxeo-resource auto id="templateLoader" on-response="_onTemplatesReceived" path="query?query=Select * From DesignTemplate"></nuxeo-resource>
-        <design-template-view doc="{{doc}}"></design-template-view>
+      <app-location route="{{route}}" use-hash-as-path></app-location>
+      <app-route route="{{route}}" pattern="/:page" data="{{data}}"></app-route>
+      <app-route route="{{route}}" pattern="/search" tail="{{searchRoute}}"></app-route>
+      <app-route route="{{route}}" pattern="/template" tail="{{templateRoute}}"></app-route>
+      <app-route route="{{route}}" pattern="/designer" tail="{{designerRoute}}"></app-route>
+      <paper-header-panel>
+        <paper-toolbar>
+          <div>COUPON DESIGNER</div>
+        </paper-toolbar>
+        <iron-pages attr-for-selected="id" selected="{{data.page}}" selected-attribute="selected">
+          <templates-page id="search" route="{{searchRoute}}"></templates-page>
+          <template-page id="template" route="{{templateRoute}}"></template-page>
+          <designer-page id="designer" route="{{designerRoute}}"></designer-page>
+        </iron-pages>
+      </paper-header-panel>
     </template>
 
     <script>
@@ -38,9 +51,15 @@ Contributors:
                 console.log("--main app ready");
             },
 
+            attached: function() {
+              if (this.route.path === '') {
+                this.set('route.path', '/search/');
+              }
+            },
+
             _onTemplatesReceived: function(e) {
                 console.log('-- Templates received');
-                this.doc = e.detail.response.entries[0];
+                this.documents = e.detail.response.entries;
             },
 
         });

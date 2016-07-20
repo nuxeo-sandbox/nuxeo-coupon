@@ -16,7 +16,7 @@ limitations under the License.
 
 Contributors:
 -->
-<dom-module id="design-template-view">
+<dom-module id="designer-page">
     <style>
         :host {
             height: 100%;
@@ -24,17 +24,30 @@ Contributors:
 
     </style>
     <template>
+        <app-route route="{{route}}" pattern="/:id" data="{{data}}"></app-route>
         <canvas id="c"></canvas>
         <paper-button raised on-click="_Save">Save</paper-button>
-        <a id="downloadLnk" download="mydesign.jpg">Download as image</a>
+        <paper-button raised on-click="_Submit">Submit</paper-button>
+        <a id="downloadLnk" download="mydesign.jpg">Download</a>
         <nuxeo-connection id="nx"></nuxeo-connection>
-        <nuxeo-document id="templateSetter" method="PUT" doc-id="[[doc.uid]]" data="[[doc]]" on-response="_onTemplateUpdated"></nuxeo-document>
-
+        <nuxeo-document
+          auto id="templategetter"
+          method="GET"
+          doc-id="[[data.id]]"
+          on-response="_onTemplateLoaded">
+        </nuxeo-document>
+        <nuxeo-document
+          id="templateSetter"
+          method="PUT"
+          doc-id="[[doc.uid]]"
+          data="[[doc]]"
+          on-response="_onTemplateUpdated">
+        </nuxeo-document>
     </template>
 
     <script>
         Polymer({
-            is: 'design-template-view',
+            is: 'designer-page',
 
             properties: {
 
@@ -64,6 +77,11 @@ Contributors:
               this.canvas.setHeight(500);
               this.canvas.setWidth(800);
               this.canvas.loadFromDatalessJSON(this.doc.properties['designtemplate:template']);
+            },
+
+            _onTemplateLoaded: function(e) {
+                console.log('-- Template received');
+                this.doc=e.detail.response;
             },
 
             _onTemplateUpdated: function(e) {
