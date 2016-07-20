@@ -1,0 +1,102 @@
+<!--
+@license
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+-->
+<dom-module id="design-template-view">
+    <style>
+        :host {
+            height: 100%;
+        }
+
+    </style>
+    <template>
+        <canvas id="c"></canvas>
+        <paper-button raised on-click="_Save">Save</paper-button>
+        <a id="downloadLnk" download="mydesign.jpg">Download as image</a>
+        <nuxeo-connection id="nx"></nuxeo-connection>
+        <nuxeo-document id="templateSetter" method="PUT" doc-id="[[doc.uid]]" data="[[doc]]" on-response="_onTemplateUpdated"></nuxeo-document>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'design-template-view',
+
+            properties: {
+
+              doc : {
+                type: Object,
+                observer: '_onDocChanged'
+              },
+
+              readonly : {
+                type: Boolean,
+                value: false
+              }
+
+            },
+
+            ready: function() {
+                console.log("--main app ready");
+                var canvas = this.canvas = this.__canvas = new fabric.Canvas(this.$.c);
+                this.$.downloadLnk.addEventListener('click', function(e) {
+                  var dt = canvas.toDataURL('image/jpeg');
+                  this.href = dt;
+                }, false);
+            },
+
+            _onDocChanged: function() {
+              this.canvas.clear();
+              this.canvas.setHeight(500);
+              this.canvas.setWidth(800);
+              this.canvas.loadFromDatalessJSON(this.doc.properties['designtemplate:template']);
+            },
+
+            _onTemplateUpdated: function(e) {
+              //do nothing
+            },
+
+            _Save: function(e) {
+              var context = this;
+              var client = this.$.nx.client;
+              this.$.c.toBlob(function(blob){
+                var nuxeoblob = new Nuxeo.Blob({
+                  content: blob,
+                  name: 'image.jpg',
+                  mimeType: 'image/jpeg'
+                });
+                client.batchUpload()
+                .upload(nuxeoblob)
+                .then(function(res) {
+                   return client.operation('Blob.AttachOnDocument')
+                     .param('document', context.doc.uid)
+                     .input(res.blob)
+                     .execute({ schemas: ['dublincore', 'file']});
+                 })
+                 .catch(function(error) {
+                   throw error;
+                 });
+               }, "image/jpeg");
+
+               context.doc.properties['designtemplate:template'] = JSON.stringify(context.canvas);
+               context.$.templateSetter.execute();
+
+            },
+        });
+    </script>
+
+</dom-module>

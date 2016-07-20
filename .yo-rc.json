@@ -1,0 +1,11 @@
+{
+  "generator-nuxeo": {
+    "promptValues": {
+      "parent_package": "org.nuxeo.coupon",
+      "parent_artifact": "nuxeo-coupon-parent",
+      "nuxeo_version": "8.3-SNAPSHOT",
+      "package": "org.nuxeo.coupon"
+    },
+    "multi": true
+  }
+}

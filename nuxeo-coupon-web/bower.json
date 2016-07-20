@@ -1,0 +1,16 @@
+{
+  "name": "nuxeo-coupon-designer",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.1.4",
+    "nuxeo-elements": "nuxeo/nuxeo-elements#^0.3.0",
+    "paper-elements": "PolymerElements/paper-elements#^1.0.5",
+    "nuxeo-labs-elements": "nuxeo-sandbox/nuxeo-labs-elements#master",
+    "iron-elements": "PolymerElements/iron-elements#^1.0.0",
+    "iron-list": "PolymerElements/iron-list#^1.2.8",
+    "fabric": "kangax/fabric.js#^1.6.3"
+  },
+  "resolutions": {
+    "iron-list": "^1.2.8"
+  }
+}
