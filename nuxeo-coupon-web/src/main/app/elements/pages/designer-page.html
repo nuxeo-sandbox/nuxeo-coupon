@@ -22,32 +22,80 @@ Contributors:
             height: 100%;
         }
 
+        .left {
+          display: inline-block;
+          width: 70%;
+        }
+
+        .right {
+          display: inline-block;
+          width: 25%;
+        }
+
+        .bottom {
+          width:25%;
+          margin:auto;
+        }
+
+        .row {
+          margin-left: 2%;
+          margin-top: 2%;
+          width: 100%;
+          display: flex;
+        }
+
+        paper-input {
+          width:50%;
+        }
+
     </style>
     <template>
-        <app-route route="{{route}}" pattern="/:id" data="{{data}}"></app-route>
-        <canvas id="c"></canvas>
-        <paper-button raised on-click="_Save">Save</paper-button>
-        <paper-button raised on-click="_Submit">Submit</paper-button>
-        <a id="downloadLnk" download="mydesign.jpg">Download</a>
-        <nuxeo-connection id="nx"></nuxeo-connection>
-        <nuxeo-document
-          auto id="templategetter"
-          method="GET"
-          doc-id="[[data.id]]"
-          on-response="_onTemplateLoaded">
-        </nuxeo-document>
-        <nuxeo-document
-          id="templateSetter"
-          method="PUT"
-          doc-id="[[doc.uid]]"
-          data="[[doc]]"
-          on-response="_onTemplateUpdated">
-        </nuxeo-document>
-        <nuxeo-operation
-          id="designSubmitter"
-          op="Context.StartWorkflow"
-          on-response="_designSubmitted">
-        </nuxeo-operation>
+      <app-route route="{{route}}" pattern="/:id" data="{{data}}"></app-route>
+      <nuxeo-connection id="nx"></nuxeo-connection>
+      <nuxeo-document
+        auto id="templategetter"
+        method="GET"
+        doc-id="[[data.id]]"
+        on-response="_onTemplateLoaded">
+      </nuxeo-document>
+      <nuxeo-document
+        id="templateSetter"
+        method="PUT"
+        doc-id="[[doc.uid]]"
+        data="[[doc]]"
+        on-response="_onTemplateUpdated">
+      </nuxeo-document>
+      <nuxeo-operation
+        id="designSubmitter"
+        op="Context.StartWorkflow"
+        on-response="_designSubmitted">
+      </nuxeo-operation>
+      <nuxeo-document
+        id="imageLoader"
+        method="GET"
+        doc-id="[[imageId]]"
+        on-response="_onImageLoaded">
+      </nuxeo-document>
+      <div class="row">
+        <div class="left">
+          <paper-input label="Name" value="{{doc.properties.dc:title}}"></paper-input>
+          <canvas id="c"></canvas>
+        </div>
+        <div class="right">
+          <div>
+            <template is="dom-if" if="{{_showImageSelection(selected)}}">
+              <span>Select an image</span>
+              <nuxeo-document-suggestion value="{{imageId}}"></nuxeo-document-suggestion>
+            </template>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="bottom">
+          <paper-button raised on-click="_Save">Save</paper-button>
+          <paper-button raised on-click="_Submit">Submit</paper-button>
+        </div>
+      </div>
     </template>
 
     <script>
@@ -68,13 +116,17 @@ Contributors:
 
             },
 
+            observers:['_onImageChange(imageId)'],
+
             ready: function() {
                 console.log("--main app ready");
+                var context = this;
                 var canvas = this.canvas = this.__canvas = new fabric.Canvas(this.$.c);
-                this.$.downloadLnk.addEventListener('click', function(e) {
-                  var dt = canvas.toDataURL('image/jpeg');
-                  this.href = dt;
-                }, false);
+                canvas.on('object:selected',function(e) {
+                  console.log("--object selected");
+                  context.selected = e.target;
+                });
+
             },
 
             _onDocChanged: function() {
@@ -93,7 +145,21 @@ Contributors:
               //do nothing
             },
 
+            _onImageChange:  function(e) {
+              console.log('-- Image Changed');
+              this.$.imageLoader.execute();
+            },
+
+            _onImageLoaded:  function(e) {
+              console.log('-- Image loaded');
+              var context = this;
+              this.selected.setSrc(e.detail.response.properties['file:content'].data,function() {
+                context.canvas.renderAll();
+              });
+            },
+
             _Save: function(e) {
+              this.canvas.deactivateAll().renderAll();
               var context = this;
               var client = this.$.nx.client;
               this.$.c.toBlob(function(blob){
@@ -130,6 +196,10 @@ Contributors:
 
             _designSubmitted: function(e) {
               window.location.href =  window.location.pathname + '#/search';
+            },
+
+            _showImageSelection:function(selected) {
+              return selected!==undefined && selected.type==="image";
             }
 
         });
