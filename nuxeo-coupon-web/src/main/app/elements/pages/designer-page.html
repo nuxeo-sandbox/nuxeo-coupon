@@ -43,6 +43,11 @@ Contributors:
           data="[[doc]]"
           on-response="_onTemplateUpdated">
         </nuxeo-document>
+        <nuxeo-operation
+          id="designSubmitter"
+          op="Context.StartWorkflow"
+          on-response="_designSubmitted">
+        </nuxeo-operation>
     </template>
 
     <script>
@@ -112,8 +117,21 @@ Contributors:
 
                context.doc.properties['designtemplate:template'] = JSON.stringify(context.canvas);
                context.$.templateSetter.execute();
-
             },
+
+            _Submit: function(e) {
+              this.$.designSubmitter.input = this.data.id;
+              this.$.designSubmitter.params = {
+                id : "ProofingWorkflow",
+                start: true
+              };
+              this.$.designSubmitter.execute();
+            },
+
+            _designSubmitted: function(e) {
+              window.location.href =  window.location.pathname + '#/search';
+            }
+
         });
     </script>
 
