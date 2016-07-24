@@ -162,24 +162,36 @@ Contributors:
               this.canvas.deactivateAll().renderAll();
               var context = this;
               var client = this.$.nx.client;
+
               this.$.c.toBlob(function(blob){
                 var nuxeoblob = new Nuxeo.Blob({
                   content: blob,
                   name: 'image.jpg',
                   mimeType: 'image/jpeg'
                 });
+
                 client.batchUpload()
-                .upload(nuxeoblob)
-                .then(function(res) {
-                   return client.operation('Blob.AttachOnDocument')
-                     .param('document', context.doc.uid)
-                     .input(res.blob)
-                     .execute({ schemas: ['dublincore', 'file']});
-                 })
-                 .catch(function(error) {
-                   throw error;
-                 });
-               }, "image/jpeg");
+                    .upload(nuxeoblob)
+                    .then(function(res) {
+                      console.log("Blob upload done");
+                      return client.operation('api_addImageToDesign')
+                                .input(res.blob) // api_addImageToDesign expects a Blob as input
+                                .params({
+                                  'designId': context.doc.uid,
+                                  'assetKind': "For Thumbnail"
+                                })
+                                .execute({ schemas: ['dublincore', 'file']})
+                                .then(function(pictureDoc) {
+                                  console.log("Picture created in the Design");
+                                })
+                                .catch(function(error) {
+                                    throw error;
+                                })
+                    })
+                    .catch(function(error) {
+                      throw error;
+                    });
+              }, "image/jpeg");
 
                context.doc.properties['designtemplate:template'] = JSON.stringify(context.canvas);
                context.$.templateSetter.execute();
