@@ -6,7 +6,7 @@
   <target name="build" description="Build Nuxeo Package">
     <property name="outdir" value="${maven.project.build.directory}"/>
     <!-- Include your artifacts in the graph adding your groupId to groupPrefixes -->
-    <artifact:nuxeo-expand includeTestScope="true" groupPrefixes="org.nuxeo,org.nuxeo.coupon"/>
+    <artifact:nuxeo-expand includeTestScope="true" groupPrefixes="org.nuxeo.coupon"/>
     <!-- For Nuxeo IDE being able to use that distribution as a SDK -->
     <artifact:print output="${outdir}/artifacts.properties" mode="sdk"/>
     <artifact:print output="${outdir}/test-artifacts.properties" mode="sdk" scopes="test"/>
