@@ -85,7 +85,7 @@ Contributors:
           <div>
             <template is="dom-if" if="{{_showImageSelection(selected)}}">
               <span>Your Logos</span>
-              <nuxeo-document-suggestion value="{{imageId}}"></nuxeo-document-suggestion>
+              <nuxeo-document-suggestion page-provider="SelectLogo_PageProvider" value="{{imageId}}"></nuxeo-document-suggestion>
             </template>
           </div>
         </div>
