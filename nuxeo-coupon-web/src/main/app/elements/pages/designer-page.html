@@ -78,7 +78,7 @@ Contributors:
       </nuxeo-document>
       <div class="row">
         <div class="left">
-          <paper-input label="Name" value="{{doc.properties.dc:title}}"></paper-input>
+          <paper-input label="Name" value="{{docTitle}}"></paper-input>
           <canvas id="c"></canvas>
         </div>
         <div class="right">
@@ -106,12 +106,21 @@ Contributors:
 
               doc : {
                 type: Object,
-                observer: '_onDocChanged'
+                observer: '_onDocChanged',
+                value: {
+                  properties: {"dc:title": ""}
+                }
               },
 
               readonly : {
                 type: Boolean,
                 value: false
+              },
+
+              docTitle: {
+                type: String,
+                value: '',
+                observer: '_onTitleChanged'
               }
 
             },
@@ -148,6 +157,13 @@ Contributors:
             _onImageChange:  function(e) {
               console.log('-- Image Changed');
               this.$.imageLoader.execute();
+            },
+
+            _onTitleChanged: function() {
+              // Make sure we received a doc
+              if(this.doc && this.doc.properties) {
+                  this.doc.properties['dc:title'] = this.docTitle;
+              }
             },
 
             _onImageLoaded:  function(e) {
