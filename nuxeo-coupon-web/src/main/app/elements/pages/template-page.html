@@ -54,7 +54,7 @@ Contributors:
         <paper-dialog modal id="dialog">
           <h2>Select An Advertiser</h2>
           <div class="dialogbody">
-            <nuxeo-document-suggestion value="{{advertiserId}}"></nuxeo-document-suggestion>
+            <nuxeo-document-suggestion page-provider="SelectAdvertiser_PageProvider" value="{{advertiserId}}"></nuxeo-document-suggestion>
           </div>
           <div class="buttons">
             <paper-button dialog-dismiss>Cancel</paper-button>
